@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Halaman Lidya</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="./img/icon.ico">
+  
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://parazalfa.github.io/myprettygirl" />
+    <meta property="og:title" content="Halaman Lidya!!" />
+    <meta property="og:description" content="Khusus untuk Lidya. Silakan masukkan kata sandi untuk masuk ke pustaka media." />
+    <meta property="og:image" content="https://parazalfa.github.io/myprettygirl/img/pratinjau.webp" />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://parazalfa.github.io/myprettygirl" />
+    <meta property="twitter:title" content="Halaman Lidya" />
+    <meta property="twitter:description" content="Khusus untuk Lidya. Silakan masukkan kata sandi untuk masuk ke pustaka media." />
+    <meta property="twitter:image" content="https://parazalfa.github.io/myprettygirl/img/pratinjau.webp" />
+
+    <style>
+        :root {
+            --lamp-shade: #f5f0e6;
+            --lamp-base: #d1ccc2;
+            --glow-color: rgba(255, 214, 110, 0.35);
+            --accent-color: #d4a373;
+            --on: 0;
+            --transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            /* Anti seleksi teks via CSS */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* Hilangkan highlight/kotak biru saat di-klik atau di-tap */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #222 url('./img/papayang.png') no-repeat center center/cover;
+            overflow: hidden;
+            position: relative;
+            transition: background-color var(--transition);
+        }
+
+        /* Ambient Glow Overlay saat lampu menyala */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 80% 20%, var(--glow-color), transparent 70%);
+            opacity: var(--on);
+            transition: opacity var(--transition);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Overlay Gelap saat Lampu Mati */
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: calc(1 - var(--on));
+            transition: opacity var(--transition);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Lampu di Pojok Kanan Atas */
+        .lamp-wrapper {
+            position: absolute;
+            top: 0px;
+            right: 20px;
+            width: 140px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .lamp-svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .lamp-shade {
+            fill: var(--lamp-shade);
+            transition: fill var(--transition);
+        }
+
+        [data-on="true"] .lamp-shade {
+            fill: #fff;
+            filter: drop-shadow(0 0 25px rgba(255, 255, 200, 0.9));
+        }
+
+        .lamp-base {
+            fill: var(--lamp-base);
+        }
+
+        .inner-glow {
+            fill: #ffdb8a;
+            opacity: 0;
+            filter: blur(12px);
+            transition: opacity var(--transition);
+        }
+
+        [data-on="true"] .inner-glow {
+            opacity: 0.8;
+        }
+
+        .cord-line {
+            stroke: #ddd;
+            stroke-width: 2;
+        }
+
+        .cord-bead {
+            fill: var(--accent-color);
+        }
+
+        .cord-hit {
+            cursor: pointer;
+        }
+
+        /* Login Container Tetap di Tengah Presisi */
+        .container {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.5s ease, filter 0.5s ease;
+            
+            /* Redup saat Lampu Mati */
+            opacity: 0.35;
+            filter: brightness(0.6);
+        }
+
+        /* Aktif Penuh saat Lampu Nyala */
+        body[data-on="true"] .container {
+            opacity: 1;
+            filter: brightness(1);
+        }
+
+        h2 {
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            padding-right: 45px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            /* Izinkan seleksi teks terbatas di dalam input password */
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        input:focus, input:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mematikan pointer events khusus input saat lampu mati agar klik dialihkan ke wrapper */
+        body[data-on="false"] input {
+            pointer-events: none;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .eye-icon {
+            position: absolute;
+            right: 0px; 
+            cursor: pointer;
+            width: 22px;
+            height: 22px;
+            fill: white;
+            opacity: 0.8;
+            box-sizing: content-box;
+            padding: 15px; 
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s ease;
+            will-change: transform, opacity;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .eye-icon:active {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+
+        .hidden {
+            opacity: 0 !important;
+            transform: scale(0.4) rotate(-45deg) !important;
+            pointer-events: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:focus, button:active {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+.error {
+    color: #ff4b2b;
+    font-size: 14px;
+    margin-top: 0;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-height 0.3s ease, margin-top 0.3s ease;
+}
+
+.error.show {
+    opacity: 1;
+    max-height: 80px; /* Memberikan ruang untuk teks error */
+    margin-top: 10px;
+}
+
+        .countdown {
+            color: #fff;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* ANIMASI SHAKE */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* POP-UP UMUM */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate3d(-50%, -50%, 0) scale(0.85);
+            opacity: 0;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #fff;
+            padding: 25px 35px;
+            border-radius: 15px;
+            z-index: 1000;
+            text-align: center;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.3s ease;
+            pointer-events: none;
+            will-change: transform, opacity;
+            max-width: 85vw;
+            width: 340px;
+        }
+
+        .popup-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .popup h3 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .popup p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .popup.show {
+            opacity: 1;
+            transform: translate3d(-50%, -50%, 0) scale(1);
+        }
+
+        /* POP-UP SUKSES (HIJAU) */
+        #success-popup {
+            background: rgba(34, 139, 34, 0.25);
+            border: 1px solid rgba(144, 238, 144, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 0 0 15px rgba(144, 238, 144, 0.2);
+        }
+
+        #success-popup p {
+            color: rgba(200, 255, 200, 0.85);
+        }
+
+        /* POP-UP PERINGATAN LAMPU (AMBER / EMAS ELEGAN) */
+        #lamp-popup {
+            background: rgba(212, 163, 115, 0.22);
+            border: 1px solid rgba(255, 214, 110, 0.45);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 214, 110, 0.25);
+        }
+
+        #lamp-popup h3 {
+            color: #ffdb8a;
+        }
+
+        #lamp-popup p {
+            color: rgba(255, 245, 225, 0.9);
+        }
+
+        @media (max-width: 480px) {
+            .lamp-wrapper {
+                right: 5px;
+                width: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body data-on="false">
+
+    <!-- Komponen Lampu Gantung Kecil di Kanan Atas -->
+    <div class="lamp-wrapper">
+        <svg class="lamp-svg" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg">
+            <ellipse class="inner-glow" cx="100" cy="110" rx="60" ry="30" />
+            <rect class="lamp-base" x="92" y="100" width="16" height="160" rx="8" />
+            <rect class="lamp-base" x="60" y="250" width="80" height="12" rx="6" />
+
+            <g class="pull-cord">
+                <line class="cord-line" x1="130" y1="110" x2="130" y2="180" />
+                <circle class="cord-bead" cx="130" cy="190" r="6" />
+                <circle class="cord-hit" cx="130" cy="190" r="40" fill="transparent" />
+            </g>
+
+            <path class="lamp-shade" d="M30 110 C 30 50, 170 50, 170 110 C 170 125, 30 125, 30 110 Z" />
+        </svg>
+    </div>
+
+    <!-- Form Login Utama (Tepat di Tengah Layar) -->
+    <div class="container" id="mainContainer">
+        <h2>Login</h2>
+        <div class="password-wrapper" onclick="handleInputClick()">
+            <input type="password" id="password" placeholder="Masukkan kata sandi..." onkeypress="handleKeyPress(event)" oninput="clearErrorMessage()" autocomplete="off" spellcheck="false" disabled>
+
+            <svg id="eyeOpen" class="eye-icon hidden" onmousedown="event.preventDefault(); togglePassword();" ontouchstart="event.preventDefault(); togglePassword();" viewBox="0 0 24 24">
+                <path d="M12 4.5C7 4.5 2.7 8 1 12c1.7 4 6 7.5 11 7.5s9.3-3.5 11-7.5c-1.7-4-6-7.5-11-7.5zm0 12.5c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z" />
+            </svg>
+
+            <svg id="eyeClosed" class="eye-icon" onmousedown="event.preventDefault(); togglePassword();" ontouchstart="event.preventDefault(); togglePassword();" viewBox="0 0 24 24">
+                <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.82l2.92 2.92c1.51-1.26 2.7-2.89 3.44-4.74-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+            </svg>
+        </div>
+        <button id="loginBtn" onclick="validatePassword()">Masuk</button>
+        <p id="error-message" class="error"></p>
+        <p id="countdown" class="countdown"></p>
+    </div>
+
+    <audio id="countdown-sound" loop>
+        <source src="./mp3/alarm.mp3" type="audio/wav">
+    </audio>
+
+    <!-- Popup Akses Diterima -->
+    <div id="success-popup" class="popup">
+        <div class="popup-content">
+            <h3>Akses Diterima</h3>
+            <p>Memuat pustaka media, mohon tunggu...</p>
+        </div>
+    </div>
+
+    <!-- Popup Peringatan Lampu Elegan -->
+    <div id="lamp-popup" class="popup">
+        <div class="popup-content">
+            <h3>💡 Lampu Belum Dinyalakan</h3>
+            <p>Harap tarik tali lampu di pojok kanan atas untuk menyalakan penerangan sebelum memasukkan kata sandi.</p>
+        </div>
+    </div>
+
+    <!-- GSAP Libraries untuk Fitur Lampu Tarik -->
+    <script src="./js/gsap.min.js"></script>
+    <script src="./js/Draggable.min.js"></script>
+
+    <script>
+        // --- SCRIPT ANTI KLIK KANAN, ANTI SALIN, DAN ANTI INSPECT ELEMENT ---
+        // 1. Matikan Klik Kanan
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // 2. Matikan Seleksi Teks & Fitur Salin/Tempel
+        document.addEventListener('selectstart', (e) => e.preventDefault());
+        document.addEventListener('copy', (e) => e.preventDefault());
+        document.addEventListener('cut', (e) => e.preventDefault());
+
+        // 3. Blokir Tombol Pintas Keyboard (F12, Ctrl+Shift+I, Ctrl+U, dll)
+        document.addEventListener('keydown', (e) => {
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // 4. Proteksi Console & Debugger Loop
+        setInterval(() => {
+            console.clear();
+            const start = performance.now();
+            (function () {
+                return false;
+            })["constructor"]("debugger")();
+            const end = performance.now();
+            if (end - start > 100) {
+                console.clear();
+            }
+        }, 500);
+
+        // --- LOGIKA UTAMA SCRIPT LOGIN ---
+        let attempts = 0;
+        const maxAttempts = 4;
+        const correctPassword = "17042023";
+        let lampPopupTimeout;
+        let errorMessageTimeout;
+
+        function handleKeyPress(e) {
+            if (e.key === "Enter") validatePassword();
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const eyeOpen = document.getElementById("eyeOpen");
+            const eyeClosed = document.getElementById("eyeClosed");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeOpen.classList.remove("hidden");
+                eyeClosed.classList.add("hidden");
+            } else {
+                passwordInput.type = "password";
+                eyeOpen.classList.add("hidden");
+                eyeClosed.classList.remove("hidden");
+            }
+        }
+
+        function triggerShake() {
+            const container = document.getElementById("mainContainer");
+            container.classList.add("shake");
+            setTimeout(() => container.classList.remove("shake"), 400);
+        }
+
+function showErrorMessage(text) {
+    const errorMessage = document.getElementById("error-message");
+    
+    clearTimeout(errorMessageTimeout); // Bersihkan timeout lama jika ada error beruntun
+    
+    errorMessage.textContent = text;
+    errorMessage.classList.add("show");
+
+    errorMessageTimeout = setTimeout(() => {
+        clearErrorMessage();
+    }, 3000);
+}
+
+function clearErrorMessage() {
+    const errorMessage = document.getElementById("error-message");
+    if (errorMessage.classList.contains("show")) {
+        errorMessage.classList.remove("show");
+        
+        // Hapus teks setelah animasi transisi pudar selesai (300ms)
+        setTimeout(() => {
+            if (!errorMessage.classList.contains("show")) {
+                errorMessage.textContent = "";
+            }
+        }, 300);
+        
+        clearTimeout(errorMessageTimeout);
+    }
+}
+
+        function handleInputClick() {
+            if (!isOn) {
+                const lampPopup = document.getElementById("lamp-popup");
+                triggerShake();
+
+                lampPopup.classList.add("show");
+
+                clearTimeout(lampPopupTimeout);
+                lampPopupTimeout = setTimeout(() => {
+                    lampPopup.classList.remove("show");
+                }, 5000);
+            }
+        }
+
+        function validatePassword() {
+            if (!isOn) {
+                handleInputClick();
+                return;
+            }
+
+            const passwordInput = document.getElementById("password");
+            const errorMessage = document.getElementById("error-message");
+            const countdownMessage = document.getElementById("countdown");
+            const audio = document.getElementById("countdown-sound");
+            const button = document.getElementById("loginBtn");
+
+            let inputVal = passwordInput.value.trim();
+
+            if (inputVal === "") {
+                showErrorMessage("⚠️ Sandi tidak boleh kosong!");
+                triggerShake();
+                passwordInput.value = ""; 
+                return; 
+            }
+
+            if (inputVal === correctPassword) {
+                showErrorMessage("✅ Akses diverifikasi!");
+                
+                localStorage.setItem("sesiLoginAktif", "baru_login");
+
+                const successPopup = document.getElementById("success-popup");
+                setTimeout(() => {
+                    successPopup.classList.add("show");
+                }, 100);
+
+                setTimeout(() => {
+                    window.location.href = "./file/utama.html";
+                }, 2200);
+            }
+            else {
+                attempts++;
+                triggerShake();
+                showErrorMessage(`❌ Salah! Sisa percobaan: ${maxAttempts - attempts}`);
+                passwordInput.value = "";
+            }
+
+            if (attempts >= maxAttempts) {
+                clearTimeout(errorMessageTimeout);
+                errorMessage.textContent = "🚨 Terlalu banyak percobaan! Anda akan dialihkan ke Instagram developer...";
+                errorMessage.classList.add("show");
+
+                let countdown = 10;
+                countdownMessage.style.display = "block";
+                countdownMessage.textContent = `Mengalihkan dalam ${countdown} detik...`;
+
+                passwordInput.disabled = true;
+                button.disabled = true;
+
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    const audioCtx = new AudioContext();
+                    const source = audioCtx.createMediaElementSource(audio);
+                    
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.value = 5.0; 
+                    
+                    source.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                } catch (e) {
+                    console.log("Web Audio API tidak didukung browser ini, memutar volume normal.");
+                }
+
+                audio.play();
+
+                let interval = setInterval(() => {
+                    countdown--;
+                    countdownMessage.textContent = `Mengalihkan dalam ${countdown} detik...`;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        audio.pause(); 
+                        window.location.href = "https://www.instagram.com/_user03122008?igsh=anJoNHFpNDJmdzRr";
+                    }
+                }, 1000);
+            }
+        }
+
+        window.onload = () => {
+            document.getElementById("password").value = "";
+        };
+
+        window.addEventListener("pageshow", (event) => {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
+
+        // --- INTEGRASI SKRIP INTERAKTIF LAMPU ---
+        gsap.registerPlugin(Draggable);
+
+        const root = document.documentElement;
+        const body = document.body;
+        const passwordInput = document.getElementById("password");
+
+        const cordBead = document.querySelector(".cord-bead");
+        const cordLine = document.querySelector(".cord-line");
+        const hitArea = document.querySelector(".cord-hit");
+
+        let isOn = false;
+
+        const clickSound = new Audio("./mp3/click.mp3");
+
+        Draggable.create(hitArea, {
+            type: "y",
+            bounds: {
+                minY: 0,
+                maxY: 60,
+            },
+            onDrag() {
+                gsap.set(cordBead, { y: this.y });
+                gsap.set(cordLine, {
+                    attr: { y2: 180 + this.y }
+                });
+            },
+            onRelease() {
+                if (this.y > 15) {
+                    toggleLamp();
+                }
+
+                gsap.to([cordBead, hitArea], {
+                    y: 0,
+                    duration: 0.5,
+                    ease: "back.out(2.5)",
+                });
+
+                gsap.to(cordLine, {
+                    attr: { y2: 180 },
+                    duration: 0.5,
+                    ease: "back.out(2.5)",
+                });
+            }
+        });
+
+        function toggleLamp() {
+            isOn = !isOn;
+            try {
+                clickSound.currentTime = 0;
+                clickSound.play();
+            } catch (e) {}
+
+            body.setAttribute("data-on", isOn);
+            root.style.setProperty("--on", isOn ? 1 : 0);
+
+            document.getElementById("lamp-popup").classList.remove("show");
+
+            if (isOn) {
+                passwordInput.disabled = false;
+            } else {
+                passwordInput.blur();
+                passwordInput.disabled = true;
+                clearErrorMessage();
+            }
+        }
+    </script>
+</body>
+</html>
