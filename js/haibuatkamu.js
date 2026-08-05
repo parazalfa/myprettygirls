@@ -38,7 +38,7 @@ aktigeser=0;thisgeser=1;
 //document.getElementById("bodyblur").onclick = function() {multifungsi()}
 
 const hrf = document.getElementById('kot').getElementsByTagName('a')[0];
-hrf.href = 'https://parazalfa.github.io/mypacar';
+hrf.href = 'https://kkykrnwn.github.io/mypacar/file/utama.html';
 
 function multifungsi(){
   if(aktigeser==1){
@@ -153,7 +153,7 @@ document.getElementById("loveIn").onclick = function() {
   function bqmuncul(){Content.style = "opacity:1;margin-top:8vh";fotostiker.style="display:none";pergeseran.style="display:none";Tombol.style="";bq.style = "position:relative;opacity:1;visibility:visible;margin-top:5vh;transform: scale(1);";setTimeout(kalimatakhir,200);ftganti=0;fthilang();}
   function bqhilang(){wallpaper.style="transform: scale(2);";bodyblur.style="opacity:.3";bq.style = "position:relative;transition:all .7s ease;";}
   
-  async function aksibalas(){await swals.fire('OK!', 'Kirim pesan ke WA aku, ya!', 'success');window.location = "https://wa.me/628889825385?text=" + pesanwhatsapp;Tombol.style="opacity:1;transform: scale(1)";}
+  async function aksibalas(){await swals.fire('OK!', 'Kirim pesan ke WA aku, ya!', 'success');window.location = "https://wa.me/6285603209755?text=" + pesanwhatsapp;Tombol.style="opacity:1;transform: scale(1)";}
    
 Content.style="display:none";
 setTimeout(function(){
