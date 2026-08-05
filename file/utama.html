@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Halaman Lidya</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../img/icon.ico">
+
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #89cff0;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 0; color: white; text-align: center;
+            min-height: 100vh;
+            user-select: none; -webkit-user-select: none;
+            background-color: #000;
+            overflow-x: hidden;
+        }
+
+        /* SISTEM DOUBLE BUFFERING BACKGROUND */
+        .bg-layer {
+            position: fixed;
+            top: -5%; left: -5%;
+            width: 110%; height: 110%;
+            z-index: -3;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transform: translateZ(0);
+            transition: opacity 1.5s ease-in-out; /* Durasi fade yang halus */
+        }
+
+        #bg-1 { opacity: 1; }
+        #bg-2 { opacity: 0; }
+
+        #bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: -1;
+        }
+
+        #sun-blind {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 9999;
+            clip-path: circle(0% at 50% 50%);
+            transition: opacity 0.2s ease, clip-path 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #sun-blind.active { opacity: 1; clip-path: circle(150% at var(--x) var(--y)); }
+
+        header { 
+            padding: 80px 20px 40px; 
+            transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.8s;
+            transform: translateY(-50px);
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        header.visible { transform: translateY(0); opacity: 1; }
+        header h1 { font-weight: 300; letter-spacing: 4px; text-shadow: 0 4px 15px rgba(0,0,0,0.6); margin: 0; }
+
+        .main-container { max-width: 1000px; margin: 0 auto; padding: 20px; position: relative; }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 120px;
+        }
+
+        .file-item {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 25px 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.7s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.7s ease-out;
+            opacity: 0; 
+            transform: translateY(40px);
+            will-change: transform, opacity;
+        }
+
+        .file-item.visible { opacity: 1; transform: translateY(0); }
+        .file-item:active { transform: scale(0.92) !important; background: white; transition: 0.1s; }
+
+        .file-number {
+            font-size: 10px; background: var(--accent); color: #000;
+            padding: 2px 8px; border-radius: 10px; font-weight: bold; margin-bottom: 10px;
+        }
+        .file-name { font-size: 14px; pointer-events: none; text-transform: capitalize; }
+
+        footer { padding: 10px 20px; background: rgba(0, 0, 0, 0.85); font-size: 12px; position: relative; }
+        footer a { color: var(--accent); text-decoration: none; font-weight: bold; }
+
+        #clock, #date {
+            position: fixed; bottom: 15px; font-size: 11px; color: var(--accent);
+            background: rgba(0,0,0,0.6); padding: 6px 15px; border-radius: 20px;
+            backdrop-filter: blur(8px); z-index: 1000; border: 1px solid var(--glass-border);
+        }
+        #clock { left: 15px; }
+        #date { right: 15px; }
+
+        /* --- NOTIFIKASI POP-UP JUDUL LAGU (SMOOTH & STABIL) --- */
+        .music-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            /* Mulai dari posisi agak ke bawah dan transparan */
+            transform: translate3d(-50%, 30px, 0);
+            opacity: 0;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            /* Efek transisi smooth cubic-bezier */
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.125), opacity 0.5s ease;
+            white-space: nowrap;
+            pointer-events: none;
+            will-change: transform, opacity;
+            
+            /* Proteksi total anti-salin */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* Saat pop-up lagu muncul */
+        .music-toast.show {
+            transform: translate3d(-50%, 0, 0);
+            opacity: 1;
+        }
+
+        /* --- POP-UP PETUNJUK KLIK DI ATAS --- */
+        .click-instruction {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            z-index: 10000;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            white-space: nowrap;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .click-instruction.hide { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        /* Animasi standby tipis agar petunjuk terlihat hidup tapi tetap stabil */
+        @keyframes floatingPulse {
+            0% { transform: translate3d(-50%, 0, 0); opacity: 0.9; }
+            50% { transform: translate3d(-50%, -4px, 0); opacity: 1; }
+            100% { transform: translate3d(-50%, 0, 0); opacity: 0.9; }
+        }
+
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="bg-1" class="bg-layer"></div>
+    <div id="bg-2" class="bg-layer"></div>
+    
+    <div id="bg-overlay"></div>
+    <div id="sun-blind"></div>
+
+    <header id="header">
+        <h1>Lidya's Library</h1>
+    </header>
+
+    <div class="main-container">
+        <div class="file-grid" id="fileGrid"></div>
+    </div>
+
+    <div id="click-instruction" class="click-instruction">👇 Klik di mana saja untuk menyalakan musik</div>
+
+    <audio id="bg-music" preload="auto"></audio>
+    <div id="music-toast" class="music-toast"></div>
+
+    <footer>
+        <p>Copyright © 2026 All Rights Reserved.<br>
+        Designed by <a href="https://instagram.com/_user03122008" target="_blank">Alfa</a> untuk 
+        <a href="https://instagram.com/_zrp4.littlebutterflly" target="_blank">Lidya</a></p>
+    </footer>
+
+    <div id="clock">00:00</div>
+    <div id="date">...</div>
+
+    <script>
+        const files = [
+          { id: 1, name: "aku pelupa", url: "cobabagi.html" }, 
+          { id: 2, name: "aku takut😖", url: "akutakut.html" },
+          { id: 3, name: "apakah pernah?", url: "apakahpernah.html" }, 
+          { id: 4, name: "asal kamu tau", url: "asalkamutau.html" },
+          { id: 5, name: "ayang apa?", url: "kamuapa.html" }, 
+          { id: 6, name: "boleh gak?", url: "buatkamuaja.html" },
+          { id: 7, name: "boro boro", url: "boroboro.html" }, 
+          { id: 8, name: "buat sayangkuu", url: "buatsayangku.html" },
+          { id: 9, name: "cemunguttt", url: "cemungut.html" }, 
+          { id: 10, name: "challenge", url: "challenge.html" },
+          { id: 11, name: "coba tebakk", url: "cobatebak.html" }, 
+          { id: 12, name: "hadiah terbesarku", url: "hadiahterbesar.html" },
+          { id: 13, name: "haii ayangg", url: "haibuatkamu.html" }, 
+          { id: 14, name: "jika nanti", url: "jikananti.html" },
+          { id: 15, name: "kalo ada", url: "kaloada.html" }, 
+          { id: 16, name: "maaf 🥺", url: "maaf.html" },
+          { id: 17, name: "maaf jika", url: "maafjika.html" }, 
+          { id: 18, name: "maaf yaaa", url: "dibacadong.html" },
+          { id: 19, name: "makasii", url: "terimakasih.html" }, 
+          { id: 20, name: "makasii yaa", url: "dibacayuk.html" },
+          { id: 21, name: "mau nanya nihh", url: "untukmu.html" }, 
+          { id: 22, name: "melupakanmu?", url: "akupanik.html" },
+          { id: 23, name: "memory game", url: "memorygame.html" }, 
+          { id: 24, name: "minta thr 😋", url: "akuminta.html" },
+          { id: 25, name: "penghargaan", url: "hanyabuatmu.html" }, 
+          { id: 26, name: "pesan buat ayang", url: "pesanbuatayang.html" },
+          { id: 27, name: "pesan buat ayangg", url: "dariku.html" }, 
+          { id: 28, name: "pilih warna apa?", url: "heikm.html" },
+          { id: 29, name: "pilih mana hayoo", url: "sayangi.html" }, 
+          { id: 30, name: "pokoknya", url: "pokoknya.html" },
+          { id: 31, name: "sayang bangett", url: "sygbanget.html" }, 
+          { id: 32, name: "sayang sama aku?", url: "bukabentarya.html" },
+          { id: 33, name: "semangatt", url: "semangat.html" }, 
+          { id: 34, name: "sesuatu buat ayang", url: "heibuka.html" },
+          { id: 35, name: "Simsalabim!! 🥳", url: "hitungan.html" }, 
+          { id: 36, name: "tangkap", url: "tangkap.html" }
+        ];
+
+        const grid = document.getElementById('fileGrid');
+        const sunBlind = document.getElementById('sun-blind');
+        
+        // Setup Grid dengan Fitur Auto-Pause & Simpan Status Musik
+        files.forEach((f) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `<span class="file-number">${f.id}</span><span class="file-name">${f.name}</span>`;
+            item.onclick = (e) => {
+                // 1. SIMPAN MEMORI: Tandai di browser bahwa kita sengaja menjeda untuk buka file
+                localStorage.setItem("musikSengajaPause", "true");
+                
+                // 2. JEDA MUSIK (Tanpa menghapus src agar detiknya tidak reset ke 0)
+                audioPlayer.pause();
+                
+                // 3. SEMBUNYIKAN POP-UP SEGERA
+                toast.classList.remove("show");
+                hilangkanPetunjuk();
+
+                // Efek visual bawaan sunBlind tetap berjalan normal
+                sunBlind.style.setProperty('--x', e.clientX + 'px');
+                sunBlind.style.setProperty('--y', e.clientY + 'px');
+                sunBlind.classList.add('active');
+                setTimeout(() => { 
+                    window.open(f.url, '_blank'); 
+                    setTimeout(() => sunBlind.classList.remove('active'), 600); 
+                }, 500);
+            };
+            grid.appendChild(item);
+        });
+
+        // --- SISTEM PLAYLIST MUSIK CERDAS DENGAN PENGUNCI OTOMATIS ---
+        const playlist = [
+          { nama: "Cruel Summer - Taylor Swift", url: "../mp3/Cruel Summer - Taylor Swift.mp3" },
+          { nama: "Birds Of A Feather - Billie Eilish", url: "../mp3/Birds Of A Feather - Billie Eilish.mp3" },
+          { nama: "Rude - Magic", url: "../mp3/Rude - Magic.mp3" },
+          { nama: "At My Worst - Pink Sweat$", url: "../mp3/At My Worst - Pink Sweat$.mp3" },
+          { nama: "Cupid (Twin Version) - Fifty Fifty", url: "../mp3/Cupid (Twin Version) - Fifty Fifty.mp3" },
+        ];
+
+        let sisaLagu = [];
+        let musikTerkunci = false; // <-- Variabel pengunci utama
+        const audioPlayer = document.getElementById("bg-music");
+        const toast = document.getElementById("music-toast");
+        const petunjukAtas = document.getElementById("click-instruction");
+
+        function resetPlaylistAcak() {
+            sisaLagu = [...playlist];
+            for (let i = sisaLagu.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [sisaLagu[i], sisaLagu[j]] = [sisaLagu[j], sisaLagu[i]];
+            }
+        }
+
+        function putarMusik() {
+            // JIKA TERKUNCI: Hentikan fungsi dan jangan putar musik apa pun
+            if (musikTerkunci) return;
+
+            if (sisaLagu.length === 0) {
+                resetPlaylistAcak();
+            }
+
+            const laguSekarang = sisaLagu.shift();
+            audioPlayer.src = laguSekarang.url;
+            audioPlayer.load(); 
+            
+            audioPlayer.play().then(() => {
+                hilangkanPetunjuk();
+                tampilkanNotifLagu(laguSekarang.nama);
+            }).catch(err => {
+                console.log("Menunggu interaksi user untuk menyalakan musik.");
+                document.addEventListener("click", pancingAutoplay, { once: true });
+                document.addEventListener("touchstart", pancingAutoplay, { once: true });
+            });
+        }
+
+        function pancingAutoplay() {
+            // JIKA TERKUNCI: Blokir pancingan jika user klik pertama kali langsung di tombol file
+            if (musikTerkunci) return;
+
+            audioPlayer.play().then(() => {
+                hilangkanPetunjuk();
+                
+                // Ambil ujung nama file dari audio player yang sedang aktif (misal: "Cintanya%20Aku.mp3")
+                const currentFile = audioPlayer.src.substring(audioPlayer.src.lastIndexOf('/') + 1);
+                
+                // Cari di dalam array playlist yang nama filenya cocok (baik teks biasa atau versi encode spasi)
+                const laguAktif = playlist.find(l => {
+                    const targetFile = l.url.substring(l.url.lastIndexOf('/') + 1);
+                    return currentFile === targetFile || currentFile === encodeURIComponent(targetFile);
+                });
+
+                // Tampilkan properti .nama dari playlist jika ditemukan
+                if (laguAktif) {
+                    tampilkanNotifLagu(laguAktif.nama);
+                } else {
+                    // Jika tidak cocok, tampilkan properti .nama dari lagu pertama di playlist sebagai cadangan stabil
+                    tampilkanNotifLagu(playlist[0].nama);
+                }
+            }).catch(e => console.log(e));
+        }
+
+        function hilangkanPetunjuk() {
+            if (petunjukAtas && !petunjukAtas.classList.contains("hide")) {
+                petunjukAtas.classList.add("hide");
+                setTimeout(() => { if (petunjukAtas) petunjukAtas.remove(); }, 500);
+            }
+        }
+
+        function tampilkanNotifLagu(namaFile) {
+            // JIKA TERKUNCI: Jangan tampilkan pop-up notifikasi lagu lagi
+            if (musikTerkunci) return;
+
+            toast.classList.remove("show");
+            setTimeout(() => {
+                toast.textContent = `🎵 Memutar: ${namaFile}`;
+                toast.classList.add("show");
+            }, 50);
+
+            setTimeout(() => { toast.classList.remove("show"); }, 4000);
+        }
+
+        // Lanjut ke lagu berikutnya (hanya jika tidak dikunci)
+        audioPlayer.addEventListener("ended", () => {
+            if (!musikTerkunci) {
+                putarMusik();
+            }
+        });
+        // ------------------------------------------
+
+        // Observer Stabil
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                } else if (entry.boundingClientRect.top > 0) {
+                    entry.target.classList.remove('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+        obs.observe(document.getElementById('header'));
+        document.querySelectorAll('.file-item').forEach(el => obs.observe(el));
+
+        // LOGIKA TRANSISI BACKGROUND ANTI-KEDIP
+        const wallpapers = Array.from({length: 11}, (_, i) => `../img/papayang${i+1}.png`);
+        let wpIndex = 0;
+        const bg1 = document.getElementById('bg-1');
+        const bg2 = document.getElementById('bg-2');
+        let currentBG = bg1;
+
+        function changeBG() {
+            const nextBG = (currentBG === bg1) ? bg2 : bg1;
+            const imgURL = wallpapers[wpIndex];
+
+            // Preload gambar secara diam-diam
+            const img = new Image();
+            img.src = imgURL;
+            img.onload = () => {
+                nextBG.style.backgroundImage = `url('${imgURL}')`;
+                
+                // Mulai transisi
+                currentBG.style.opacity = "0";
+                nextBG.style.opacity = "1";
+                
+                // Tukar status
+                currentBG = nextBG;
+                wpIndex = (wpIndex + 1) % wallpapers.length;
+            };
+        }
+
+        // Jalankan pertama kali
+        bg1.style.backgroundImage = `url('${wallpapers[0]}')`;
+        wpIndex = 1;
+        setInterval(changeBG, 7000);
+
+        function updateTime() {
+            const n = new Date();
+            document.getElementById('clock').innerText = n.getHours().toString().padStart(2, '0') + ":" + n.getMinutes().toString().padStart(2, '0');
+            document.getElementById('date').innerText = n.toLocaleDateString('id-ID', {weekday:'short', day:'numeric', month:'short'});
+        }
+        setInterval(updateTime, 1000); updateTime();
+
+        // --- SISTEM PELACAKAN SESI MUSIK BERLANJUT (BACK / FORWARD BROWSER) ---
+        window.addEventListener("pageshow", (event) => {
+            const harusResume = localStorage.getItem("musikSengajaPause");
+            const statusSesi = localStorage.getItem("sesiLoginAktif");
+
+            // JIKA BARU MASUK DARI PROSES LOGIN (Sandi Benar)
+            if (statusSesi === "baru_login") {
+                // Set status menjadi 'setia' agar jika ter-back tidak mengulang dari awal lagi
+                localStorage.setItem("sesiLoginAktif", "dalam_pustaka");
+                localStorage.removeItem("musikSengajaPause");
+                resetPlaylistAcak();
+                putarMusik();
+            } 
+            // JIKA KEMBALI KARENA TOMBOL PANAH FORWARD/BACK BROWSER (Sesi Berlanjut)
+            else {
+                // Jika audio sudah ada lagunya dan sedang terjeda, langsung lanjutkan detiknya
+                if (audioPlayer.src) {
+                    audioPlayer.play().catch(e => {
+                        console.log("Menunggu ketukan layar untuk melanjutkan lagu sesi sebelumnya.");
+                    });
+                } else {
+                    // Proteksi darurat jika cache browser hilang murni
+                    resetPlaylistAcak();
+                    putarMusik();
+                }
+            }
+        });
+
+        // Deteksi jika user kembali dari tab file sebelah
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                const harusResume = localStorage.getItem("musikSengajaPause");
+                if (harusResume === "true" && audioPlayer.src) {
+                    localStorage.removeItem("musikSengajaPause");
+                    audioPlayer.play().catch(e => console.log("Gagal auto-resume tab."));
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
